@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>科学技术奖统计——省级</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../css/main.css" media="all">
+</head>
+<body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<script src="../js/myJs.js" charset="utf-8"></script>
+<div class="layui-card">
+    <div class="layui-card-header" >
+        <i class="layui-icon layui-icon-rate-half"></i><strong>科学技术奖统计——省级</strong>
+        <i style="float:right;" class="layui-icon layui-icon-refresh-3 refresh-btn"></i>
+    </div>
+    <div class="layui-form-pane demoTable">
+        <!-- 年范围选择器-->
+        <div class="layui-inline" style="position: absolute;left: 30%;top: 12%;">
+            <label class="layui-form-label" style="color: #fff;background-color: #009688;border-width: 1.5px;border-color: #009f95;height: 41px"><strong>获奖时间</strong></label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="trDate" placeholder=" - " style="border-color: #009688;border-width: 1.5px;height: 41px;" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-inline" style="position: absolute;left: 60%;top: 12.5%;">
+            <button class="layui-btn layui-btn-sm"  data-type="reload" style="height: 36px">
+                <i class="layui-icon layui-icon-search"></i>
+            </button>
+        </div>
+    </div>
+        <div style="position: absolute;left: 1%; top: 20%;width: 98%">
+             <table class="layui-hide layui-table" id="demo" lay-filter="test"></table>
+        </div>
+</div>
+<!--头工具栏操作按钮-->
+<script type="text/html" id="toolbarDemo">
+
+    <div class="layui-row" style="height: 3%">
+        <div class="layui-col-md10 layui-col-sm9 layui-col-xs6" style="text-align: right;width: 110%;">
+            <!--筛选，导出，打印-->
+            <div class="layui-input-inline yutons-btn-margin-right">
+				<span class="layui-inline yutons-header-tool" title="筛选列" lay-event="LAYTABLE_COLS">
+							<i class="layui-icon layui-icon-cols"></i></span>
+                <span class="layui-inline yutons-header-tool" title="导出" lay-event="table_export">
+				                    <i class="layui-icon layui-icon-export"></i></span>
+                <span class="layui-inline yutons-header-tool" title="打印" lay-event="LAYTABLE_PRINT">
+							<i class="layui-icon layui-icon-print"></i>
+				</span>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script>
+
+    layui.config({
+        base: '../layui/layui_exts/',
+    }).use(['table','excel','form'],function () {
+        var table = layui.table,
+            $ = layui.$,
+            excel = layui.excel,
+            form = layui.form;
+        //表格
+        table.render({
+            elem: '#demo'
+            ,url: '/scienceresult/list'
+            , id: 'testReload'
+            ,toolbar: "#toolbarDemo"
+            ,page: false
+            , defaultToolbar: []
+            ,title: '教学成果统计'
+            ,totalRow: true
+            ,cols: [[
+                {align:'center',title:'编号',type:'numbers',width:'5%',totalRowText: '合计'}
+                ,{align:'center',field:'schoolname',title:'成果完成单位',width:'21%'}
+                ,{align:'center',field:'special',title:'特等奖',width:'23%',totalRow: true,event: 'special',style:'cursor: pointer;'}
+                ,{align:'center',field:'first',title:'一等奖',width:'23%',totalRow: true,event: 'first',style:'cursor: pointer;'}
+                ,{align:'center',field:'second',title:'二等奖',width:'23%',totalRow: true,event: 'second',style:'cursor: pointer;'}
+                , {align:'center',field:'total',title:'合计',width:'5.35%',totalRow: true,event: 'total', style:'cursor: pointer;'}
+            ]]
+            ,done: function (res) {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight':'bold'});
+            }
+            ,paresData:function () {
+                return{
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                }
+            }
+        });
+        //表格重载
+        var $ = layui.$, active = {
+            reload: function () {
+                demoReload = $('#trDate').val();
+                startTime = demoReload.slice(0,5);
+                endTime = demoReload.slice(8,13);
+                //执行重载
+                table.reload('testReload',{
+                    curr: curnum=1
+                    ,url:'/scienceresult/queryByDate'
+                    ,where:{
+                        startTime: startTime,
+                        endTime: endTime,
+                    }
+                    /*,page: {
+                        false,
+                        curr: 1 //重新从第 1 页开始
+                    }*/
+
+                });
+            }
+        };
+        $('.demoTable .layui-btn').on('click',function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //监听头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id),
+                data = checkStatus.data; //获取选中的数据
+            switch (obj.event) {
+                //Excel导出
+                case 'table_export':
+                    exportFile('demo');
+                    break;
+            }
+        });
+
+        //监听单元格事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+
+            if(obj.event === 'special'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 特等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCount-detail.html?schoolname=' + data.schoolname+'?trGrade='+"特等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'first'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 一等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCount-detail.html?schoolname=' + data.schoolname+'?trGrade='+"一等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'second'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 二等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCount-detail.html?schoolname=' + data.schoolname+'?trGrade='+"二等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'total'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 所获奖项] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCount-detail.html?schoolname=' + data.schoolname+'?trGrade='+"统计",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+
+        });
+
+        //表格导出
+        function exportFile(id) {
+            demoReload = $('#trDate').val();
+            startTime = demoReload.slice(0,5);
+            endTime = demoReload.slice(8,13);
+            if (startTime == "" && endTime == ""){
+                startTime = 'null';
+                endTime  = 'null';
+            }
+            $.ajax({
+                url: '/scienceresult/export/'+startTime+'/'+endTime
+                , dataType: 'json'
+                , success(res) {
+                    var data = res.data;
+                    var arr = [{
+                        number:{
+                            v: '科学技术奖统计表——省级',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                },
+                                font: {
+                                    sz: 18
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        special: '',
+                        first: '',
+                        second: '',
+                        total: ''
+                    },
+                        {
+                            number:{
+                                v: '编号',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            schoolname:{
+                                v: '成果完成单位',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special: {
+                                v: '特等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first: {
+                                v: '一等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second: {
+                                v: '二等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            total: {
+                                v: '合计',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                    data = excel.filterExportData(data, [
+                        'number',
+                        'schoolname',
+                        'special',
+                        'first',
+                        'second',
+                        'total'
+                    ]);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].number = i+1;
+                    }
+                    var mergeConf = excel.makeMergeConfig([
+                        ['A1','F1']
+                    ]);
+                    // 2. B列宽 150，F列宽200，默认80
+                    var colConf = excel.makeColConfig({
+                        A: 40,
+                        B: 400
+                    }, 60);
+                    // 3. 第1行行高40，第二行行高30，默认20
+                    var rowConf = excel.makeRowConfig({
+                        1: 40
+                    },40);
+                    // 4. 公式的用法
+                    data.push({
+                        number :{
+                            v: '合计',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        special: {t: 'n', f: 'SUM(C3:C'+(data.length+2)+')'},
+                        first: {t: 'n', f: 'SUM(D3:D'+(data.length+2)+')'},
+                        second: {t: 'n', f: 'SUM(E3:E'+(data.length+2)+')'},
+                        total:  {t: 'n', f: 'SUM(F3:F'+(data.length+2)+')'}
+                    });
+                    excel.setExportCellStyle(data,'A1:B'+data.length,{
+                        s: {
+                            alignment: {
+                                horizontal: 'center',
+                                vertical: 'center'
+                            }
+                        }
+                    });
+                    excel.exportExcel(arr.concat(data)
+                        , '科学技术奖统计表——省级.xlsx', 'xlsx', {
+                            extend: {
+                                // extend 中可以指定某个 sheet 的属性，如果不指定 sheet 则所有 sheet 套用同一套属性
+                                '!merges': mergeConf
+                                , '!cols': colConf
+                                , '!rows': rowConf
+                            }
+                        });
+                },
+                error() {
+                    layer.alert('获取数据失败');
+                }
+            });
+        }
+    });
+
+    //年范围选择器
+    yearData();
+
+</script>
+<script type="text/html" id="countTest">
+<a href="http://localhost:8080/teachingresult/list" class="layui-table-link"></a>
+
+
+</script>
+</body>
+</html>

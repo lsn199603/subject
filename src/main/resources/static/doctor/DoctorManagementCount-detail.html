@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <title>博士点信息统计详情</title>
+</head>
+<body>
+<div style="position:absolute;left: 2.5%; width: 95%">
+    <table class="layui-hide" id="demo" lay-filter="test"></table>
+</div>
+</body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['table'],function () {
+        var table = layui.table,
+            $ = layui.$;
+
+        schoolname=location.href.split("?")[1].split("=")[1];
+        dGrade=location.href.split("?")[2].split("=")[1];
+
+        //执行table分页
+        table.render({
+            elem: '#demo'
+            , id: 'testReload'
+            , height: "auto"
+            , defaultToolbar: []
+            , url: '/doctorinformation/CountDetail/'+schoolname+'/'+dGrade+'' //数据接口
+            , page: true //开启分页
+            , limit: 5
+            , limits: [5, 10, 15]
+            , title: '博士点信息统计详情表'
+            , cols: [[ //表头
+                {align: 'center', title: '编号', type: 'numbers', width:'4.25%'}
+                , {align: 'center', field: 'siName', title: '高校名称',width:'50%'}
+                , {align: 'center', field: 'smName', title: '学科名称', width:'36%'}
+                , {align: 'center', field: 'dTime', title: '批准时间',width:'10%'}
+                , {align: 'center', field: 'dGrade', title: '级别',width:'15%'}
+            ]]
+            //表头颜色
+            , done: function () {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight': 'bold'});
+                if (!(decodeURI(dGrade) == "统计")){
+                    $("[data-field='dGrade']").css('display','none');
+                }
+            }
+            , paresData: function (res) {
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                };
+            }
+        });
+    });
+</script>
+</html>

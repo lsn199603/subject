@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>科学技术奖成果统计对比——省级</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../css/main.css" media="all">
+</head>
+<body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<script src="../js/myJs.js" charset="utf-8"></script>
+<div class="layui-card">
+    <div class="layui-card-header" >
+        <i class="layui-icon layui-icon-rate-half"></i><strong>科学技术奖成果统计对比——省级</strong>
+        <i style="float:right;" class="layui-icon layui-icon-refresh-3 refresh-btn"></i>
+    </div>
+    <div class="layui-form-pane demoTable">
+        <!-- 年范围选择器-->
+        <div class="layui-inline" style="position: absolute;left: 30%;top: 12%;">
+            <label class="layui-form-label" style="color: #fff;background-color: #009688;border-width: 1.5px;border-color: #009f95;height: 41px"><strong>获奖时间</strong></label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="trDate" placeholder=" - " style="border-color: #009688;border-width: 1.5px;height: 41px;" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-inline" style="position: absolute;left: 60%;top: 12.5%;">
+            <button class="layui-btn layui-btn-sm"  data-type="reload" style="height: 36px">
+                <i class="layui-icon layui-icon-search"></i>
+            </button>
+        </div>
+    </div>
+    <div style="position: absolute;left: 1%; top: 20%;width: 98%">
+        <table class="layui-hide layui-table" id="demo" lay-filter="test"></table>
+    </div>
+</div>
+<!--头工具栏操作按钮-->
+<script type="text/html" id="toolbarDemo">
+
+    <div class="layui-row" style="height: 3%">
+        <div class="layui-col-md10 layui-col-sm9 layui-col-xs6" style="text-align: right;width: 110%;">
+            <!--筛选，导出，打印-->
+            <div class="layui-input-inline yutons-btn-margin-right">
+                <span class="layui-inline yutons-header-tool" title="导出" lay-event="table_export">
+				                    <i class="layui-icon layui-icon-export"></i></span>
+                <span class="layui-inline yutons-header-tool" title="打印" lay-event="LAYTABLE_PRINT">
+							<i class="layui-icon layui-icon-print"></i>
+				</span>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script>
+    var colsArr = [];
+    $.ajaxSettings.async=false;
+    $.getJSON('/scienceresult/CountCompare',function (res) {
+        var date = res.data[0];
+        var time  = new Date;
+        var year = time.getFullYear();
+        var yearArray = [(year-2)+'年',(year-1)+'年',year+'年'];
+        for (var i = 0;i < 3;i++){
+            colsArr[i] =  {align:'center',field:'special'+(i+1),title:yearArray[i],totalRow: true,width:80,event:'special'+(i+1),style:'cursor: pointer;'};
+        }
+        for (var i = 3;i < 6;i++) {
+            colsArr[i] =  {align:'center',field:'first'+(i-2),title:yearArray[i-3],totalRow: true,width:80,event:'first'+(i-2),style:'cursor: pointer;'};
+        }
+        for (var i = 6;i < 9;i++) {
+            colsArr[i] =  {align:'center',field:'second'+(i-5),title:yearArray[i-6],totalRow: true,width:80,event:'second'+(i-5),style:'cursor: pointer;'};
+        }
+    });
+    $.ajaxSettings.async=true;
+    layui.config({
+        base: '../layui/layui_exts/',
+    }).use(['table','excel','form'],function () {
+        var table = layui.table,
+            $ = layui.$,
+            excel = layui.excel,
+            form = layui.form;
+            table.render({
+                elem: '#demo'
+                ,url: '/scienceresult/CountCompare'
+                , id: 'testReload'
+                ,toolbar: "#toolbarDemo"
+                ,page: false
+                , defaultToolbar: []
+                ,title: '教学成果统计对比'
+                ,totalRow: true
+                ,cols:  [[{align:'center',title:'编号',type:'numbers',width:'5%',totalRowText: '合计',rowspan: 2}
+                ,{align:'center',field:'schoolname',title:'成果完成单位',width:'19%',rowspan:2}
+                ,{align:'center',title:'特等奖',colspan: 3}
+                ,{align:'center',title:'一等奖',colspan: 3}
+                ,{align:'center',title:'二等奖',colspan: 3}
+                ,{align:'center',field:'total',title:'合计',rowspan: 2,event:'total'}],
+                    colsArr]
+                ,done: function (res) {
+                    this.cols = [];
+                    $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight':'bold'});
+                }
+                ,paresData:function () {
+                    return{
+                        "code": res.code,
+                        "msg": res.msg,
+                        "count": res.count,
+                        "data": res.data
+                    }
+                }
+            });
+        //表格重载
+        var $ = layui.$, active = {
+           reload: function () {
+                var demoReload = $('#trDate').val();
+                var startTime = demoReload.slice(0,5);
+                var endTime = demoReload.slice(8,13);
+                //执行重载
+               $.ajaxSettings.async=false;
+                $.getJSON('/scienceresult/CountCompareByDate?startTime='+startTime+'&endTime='+endTime,function (res) {
+                    for (var i = 0;i < 3;i++){
+                        colsArr[i] =  {align:'center',field:'special'+(i+1),title:res.data[0].date[i],totalRow: true,width:80,event:'special'+(i+1),style:'cursor: pointer;'};
+                    }
+                    for (var i = 3;i < 6;i++) {
+                       colsArr[i] =  {align:'center',field:'first'+(i-2),title:res.data[0].date[i-3],totalRow: true,width:80,event:'first'+(i-2),style:'cursor: pointer;'};
+                    }
+                    for (var i = 6;i < 9;i++) {
+                       colsArr[i] =  {align:'center',field:'second'+(i-5),title:res.data[0].date[i-6],totalRow: true,width:80,event:'second'+(i-5),style:'cursor: pointer;'};
+                    }
+                });
+               $.ajaxSettings.async=true;
+                table.reload('testReload',{
+                    url:'/scienceresult/CountCompareByDate'
+                    ,where:{
+                        startTime: startTime,
+                        endTime: endTime,
+                    },
+                    cols:  [[{align:'center',title:'编号',type:'numbers',width:'5%',totalRowText: '合计',rowspan: 2}
+                   ,{align:'center',field:'schoolname',title:'成果完成单位',width:'19%',rowspan:2}
+                   ,{align:'center',title:'特等奖',colspan: 3}
+                   ,{align:'center',title:'一等奖',colspan: 3}
+                   ,{align:'center',title:'二等奖',colspan: 3}
+                   ,{align:'center',field:'total',title:'合计',rowspan: 2,event:'total'}],colsArr]
+                });
+            }
+        };
+        $('.demoTable .layui-btn').on('click',function () {
+            var type = $(this).data('type');
+            var demoReload = $('#trDate').val();
+            var startTime = demoReload.slice(0,4);
+            var endTime = demoReload.slice(8,12);
+            if (endTime-startTime  == 2){
+                active[type] ? active[type].call(this) : '';
+            } else {
+                layer.msg("获奖时间范围选择错误,请重新选择年范围(年范围:3年)",{
+                    icon: 2,
+                    time: 6000 //2秒关闭（如果不配置，默认是3秒）
+                })
+            }
+
+        });
+
+        //监听头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id),
+                data = checkStatus.data; //获取选中的数据
+            switch (obj.event) {
+                //Excel导出
+                case 'table_export':
+                    exportFile('demo');
+                    break;
+            }
+        });
+
+        //监听单元格事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'special1'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date1+' 特等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date1+'?trGrade='+"特等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'special2'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date2+' 特等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date2+'?trGrade='+"特等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'special3'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date3+' 特等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date3+'?trGrade='+"特等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'first1'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date1+' 一等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date1+'?trGrade='+"一等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'first2'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date2+' 一等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date2+'?trGrade='+"一等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'first3'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date3+' 一等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date3+'?trGrade='+"一等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'second1'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date1+' 二等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date1+'?trGrade='+"二等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'second2'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date2+' 二等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date2+'?trGrade='+"二等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'second3'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---'+data.date3+' 二等奖] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date3+'?trGrade='+"二等奖",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+            else if (obj.event === 'total'){
+                layer.open({
+                    title: ['['+ data.schoolname +'---['+data.date1+','+data.date2+','+data.date3+'] 详细信息'],
+                    type: 2,
+                    content: 'scienceresultCompareCount-detail.html?schoolname=' + data.schoolname+'?time='+data.date.join(',')+'?trGrade='+"统计",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+
+        });
+        //表格导出
+        function exportFile(id) {
+            var date = new Date();
+            var year = date.getFullYear();
+            demoReload = $('#trDate').val();
+            startTime = demoReload.slice(0,5);
+            endTime = demoReload.slice(8,13);
+            if (startTime == "" && endTime == ""){
+                startTime = (year-2)+'年';
+                endTime  = year+'年';
+            }
+            $.ajax({
+                url: '/scienceresult/exportCountCompar/'+startTime+'/'+endTime
+                , dataType: 'json'
+                , success(res) {
+                    var data = res.data;
+                    var arr = [{
+                        number:{
+                            v: '科学技术奖成果统计对比——省级',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                },
+                                font: {
+                                    sz: 18
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        special1: '',
+                        special2: '',
+                        special3: '',
+                        first1: '',
+                        first2: '',
+                        first3: '',
+                        second1: '',
+                        second2: '',
+                        second3: '',
+                        total: ''
+                    },
+                        {
+                            number:{
+                                v: '编号',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            schoolname:{
+                                v: '成果完成单位',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special1: {
+                                v: '特等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special2: '',
+                            special3: '',
+                            first1: {
+                                v: '一等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first2: '',
+                            first3: '',
+                            second1: {
+                                v: '二等奖',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second2: '',
+                            second3: '',
+                            total: {
+                                v: '合计',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            }
+                        },{
+                            number:{
+                                v: '编号',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            schoolname:{
+                                v: '成果完成单位',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special1: {
+                                v: data[0].date1,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special2: {
+                                v: data[0].date2,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            special3: {
+                                v: data[0].date3,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first1: {
+                                v: data[0].date1,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first2: {
+                                v: data[0].date2,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first3: {
+                                v: data[0].date3,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second1: {
+                                v: data[0].date1,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second2:{
+                                v: data[0].date2,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second3:{
+                                v: data[0].date3,
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            total: {
+                                v: '合计',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                    data = excel.filterExportData(data, [
+                        'number',
+                        'schoolname',
+                        'special1',
+                        'special2',
+                        'special3',
+                        'first1',
+                        'first2',
+                        'first3',
+                        'second1',
+                        'second2',
+                        'second3',
+                        'total'
+                    ]);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].number = i+1;
+                    }
+                    var mergeConf = excel.makeMergeConfig([
+                        ['A1','L1'],
+                        ['A2','A3'],
+                        ['B2','B3'],
+                        ['C2','E2'],
+                        ['F2','H2'],
+                        ['I2','K2'],
+                        ['L2','L3']
+                    ]);
+                    // 2. B列宽 150，F列宽200，默认80
+                    var colConf = excel.makeColConfig({
+                        A: 40,
+                        B: 500
+                    }, 60);
+                    // 3. 第1行行高40，第二行行高30，默认20
+                    var rowConf = excel.makeRowConfig({
+                        1: 40
+                    },40);
+                    // 4. 公式的用法
+                    data.push({
+                        number :{
+                            v: '合计',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        special1: {t: 'n', f: 'SUM(C4:C'+(data.length+3)+')'},
+                        special2: {t: 'n', f: 'SUM(D4:D'+(data.length+3)+')'},
+                        special3: {t: 'n', f: 'SUM(E4:E'+(data.length+3)+')'},
+                        first1: {t: 'n', f: 'SUM(F4:F'+(data.length+3)+')'},
+                        first2: {t: 'n', f: 'SUM(G4:G'+(data.length+3)+')'},
+                        first3: {t: 'n', f: 'SUM(H4:H'+(data.length+3)+')'},
+                        second1: {t: 'n', f: 'SUM(I4:I'+(data.length+3)+')'},
+                        second2: {t: 'n', f: 'SUM(J4:J'+(data.length+3)+')'},
+                        second3: {t: 'n', f: 'SUM(K4:K'+(data.length+3)+')'},
+                        total:  {t: 'n', f: 'SUM(L4:L'+(data.length+3)+')'}
+                    });
+                    excel.setExportCellStyle(data,'A1:B'+data.length,{
+                        s: {
+                            alignment: {
+                                horizontal: 'center',
+                                vertical: 'center'
+                            }
+                        }
+                    });
+                    excel.exportExcel(arr.concat(data)
+                        , '科学技术奖成果统计对比——省级.xlsx', 'xlsx', {
+                            extend: {
+                                // extend 中可以指定某个 sheet 的属性，如果不指定 sheet 则所有 sheet 套用同一套属性
+                                '!merges': mergeConf
+                                , '!cols': colConf
+                                , '!rows': rowConf
+                            }
+                        });
+                },
+                error() {
+                    layer.alert('获取数据失败');
+                }
+            });
+        }
+    });
+
+    //年范围选择器
+    yearData();
+
+</script>
+<script type="text/html" id="countTest">
+    <a href="http://localhost:8080/teachingresult/list" class="layui-table-link"></a>
+</script>
+</body>
+</html>

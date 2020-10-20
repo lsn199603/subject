@@ -1,0 +1,228 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>添加学科平台信息</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="shortcut icon" th:href="./images/favicon.ico" type="image/x-icon">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="renderer" content="webkit">
+
+
+    <!-- 引入css -->
+
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/font/dtreefont.css">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style type="text/css">
+        .select-test{position: absolute;padding-left:-10px; max-height: 500px;height: 350px;overflow: auto;width: 220px;z-index: 123;display: none;border:1px solid silver;top: 42px;}
+        .layui-show{display: block!important;}
+
+    </style>
+</head>
+<body>
+<script src="../layui/layui.js" charset="utf-8"></script>
+<script src="../js/myJs.js" charset="utf-8"></script>
+<script src="../lib/layui-v2.3.0/layui.js" charset="utf-8"></script>
+<script src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<div class="layui-form timo-compile">
+    <form class="layui-form" id="form">
+        <input type="hidden" name="id">
+        <div class="layui-form-item" style="position: absolute; left: 50%; top: 2%">
+            <label class="layui-form-label" style="width: 126px">学科平台目录代码<span class="required"> *</span></label>
+            <div class="layui-input-inline">
+                <input type="text" name="spmId" id="spmId" lay-verify="required" autocomplete="off" placeholder="自动生成" class="layui-input" readonly="readonly" >
+            </div>
+        </div>
+
+        <div class="layui-form-item" style="position: absolute; top: 2%">
+            <label class="layui-form-label" style="width: 105px">学科平台目录<span class="required"> *</span></label>
+            <div class="layui-input-inline">
+                <div class="layui-unselect layui-form-select" id="spmenu">
+                    <input type="text" name="spmName" id="input_spm" placeholder="请选择" readonly="" class="layui-input" lay-verify="required">
+                    <i class="layui-edge"></i>
+                </div>
+                <div class="layui-card select-test" id="spmtest">
+                    <div class="layui-card-body">
+                        <div id="spmDiv"><ul id="spmTree" class="dtree" data-id="10"></ul></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="position: absolute; top: 26%">
+            <label class="layui-form-label" style="width: 105px">学科/平台名称<span class="required"> *</span></label>
+            <div class="layui-input-inline">
+                <input type="text" id="spName" name="spName" lay-verify="required" autocomplete="off" placeholder="请输入学科/平台名称" class="layui-input">
+            </div>
+        </div>
+
+            <div class="layui-form-item" style="position: absolute; top: 10%">
+                <label class="layui-form-label" style="width: 105px">高校名称<span class="required"> *</span></label>
+                <div class="layui-input-block" id="test1" lay-filter="test1" style="position: absolute;top: 2%;left: 19%;width: 190px">
+                    <select lay-filter="Type_filter" id="school" name="siName" lay-verify="required">
+                    </select>
+                </div>
+            </div>
+
+               <div class="layui-form-item" style="position: absolute; left: 50%; top: 10%">
+                        <label class="layui-form-label" style="width: 126px">高校代码<span class="required"> *</span></label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="siId" lay-verify="required" autocomplete="off" placeholder="自动生成" class="layui-input" readonly="readonly">
+                        </div>
+               </div>
+
+        <div class="layui-form-item" style="position: absolute; top: 18%">
+            <label class="layui-form-label" style="width: 105px">联系人<span class="required"> *</span></label>
+            <div class="layui-input-inline">
+                <input type="text" id="spContact" name="spContact" lay-verify="required" autocomplete="off" placeholder="请输入联系人姓名" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="position: absolute;left: 50%; top: 18%">
+            <label class="layui-form-label" style="width: 126px">联系人电话<span class="required"> *</span></label>
+            <div class="layui-input-inline">
+                <input type="text" id="spCPhone" name="spCPhone" lay-verify="phone" autocomplete="off" placeholder="请输入联系人电话" class="layui-input">
+            </div>
+        </div>
+
+            <div class="layui-form-item" style="position: absolute; left: 50%; top: 26%">
+                <label class="layui-form-label" style="width: 126px">备注</label>
+                <div class="layui-input-inline">
+                    <textarea type="text" style="OVERFLOW: visible;height: 40px;" name="spRemark" id="spRemark" lay-verify="title" autocomplete="off" placeholder="请输入备注" class="layui-input"></textarea>
+                </div>
+            </div>
+        <div style="position: absolute;top: 34%;left: 35%" >
+            <button class="layui-btn" lay-submit="" lay-filter="component-form-demo">添加</button>
+        </div>
+    </form>
+</div>
+
+<div style="position: absolute;top: 34%;left: 45%">
+    <button class="layui-btn" onclick="saveAll()">保存</button>
+</div>
+<div class="layui-form timo-compile">
+
+    <div style="position: absolute;top: 44%;left: 1%; width: 98%;">
+        <table class="layui-table timo-table" id="mytable" style="width: 100%;text-align: center" >
+                <tr style="background-color: #009f95;color: #fff;text-align: center">
+                <th style="width:6%;text-align: center">编号</th>
+                <th style="width:13%;text-align: center">学科平台目录代码</th>
+                <th style="width:13%;text-align: center">学科平台目录名称</th>
+                <th style="width:13%;text-align: center">学科平台名称</th>
+                <th style="width:8%;text-align: center">高校代码</th>
+                <th style="width:13%;text-align: center">高校名称</th>
+                <th style="width:12%;text-align: center">联系人</th>
+                <th style="width:12%;text-align: center">联系人电话</th>
+                <th style="width:10%;text-align: center">操作</th>
+                </tr>
+            <tbody id="mytbody">
+
+            </tbody>
+
+        </table>
+    </div>
+</div>
+<!--获取表单选中的值动态添加到表格中-->
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+<script>
+    layui.use(['table','form','laydate'],function () {
+        var table = layui.table,
+            $ = layui.$,
+            form = layui.form;
+
+        //监听添加
+        form.on('submit(component-form-demo)',function (data) {
+            doctorId = $("#mytable").find("tr").length;
+            var siName = document.getElementById("school").options[document.getElementById("school").selectedIndex].text;
+
+            var addtr = $("<tr>" +
+                "<td>" + doctorId + "</td>" +
+                "<td name='spmId'>" +  data.field.spmId + "</td>" +
+                "<td name='spmName'>" +  data.field.spmName + "</td>" +
+                "<td name='spName'>" +  data.field.spName + "</td>" +
+                "<td name='siId'>" +  data.field.siId + "</td>" +
+                "<td name='siName'>" + siName + "</td>" +
+                "<td name='spContact'>" +  data.field.spContact + "</td>" +
+                "<td name='spCPhone'>" +  data.field.spCPhone + "</td>" +
+                "<td name='spRemark' style='display: none'>" +  data.field.spRemark + "</td>" +
+                "<td><a class='layui-btn' href=\"javascript:;\" onclick=\"del(this)\">删除</a></td>" +
+                "</tr>");
+
+            addtr.appendTo('#mytable');
+            document.getElementById("form").reset();
+            return false;
+        });
+
+    });
+
+//删除一行后排序不变
+    function del(tr){
+        layer.confirm('您确定删除吗？',{title:'温馨提示',skin: 'layui-layer-molv'},function(){
+            var doctorId=$(tr).parent().parent().find("td:eq(0)").text();//获取当前的编号
+            var num2=$(tr).parent().parent().nextAll("tr").length;//获取当前元素后的同级元素个数
+            if(num2>0){
+                for(i=0;i<num2;i++){ //循环将后面的数字减去1
+
+                    var doctorId=$(tr).parent().parent().nextAll("tr").find("td:eq(0)").eq(i).text();
+
+                    $(tr).parent().parent().nextAll("tr").find("td:eq(0)").eq(i).text(parseInt(doctorId)-1);
+                }
+            }
+            layer.msg("删除成功", {icon: 6, shade: 0.5, time: 1500});
+            $(tr).parent().parent().remove()
+        });
+
+    }
+   <!--添加表格数据到数据库-->
+   function saveAll() {
+       var subjectplatform = new Array();
+       var length = $("#mytable").find("tr").length-1;
+       //循环tr原素
+       for (i=1;i<=length;i++) {
+           var obj = {};
+           for(j=1;j<=8;j++){
+               var td = $("#mytable").find("tr").eq(i).children("td").eq(j);
+               obj[$(td).attr('name')] = $(td).text();
+           }
+           subjectplatform.push(obj);
+       }
+
+       layer.confirm('您确定添加吗？',{title:'温馨提示',skin: 'layui-layer-molv'},function(){
+           $.ajax({
+               type: "POST",
+               traditional: true,
+               url: '/subjectplatform/addAllDoctor',
+               data: JSON.stringify({"subjectplatformList":subjectplatform}),
+               contentType: "application/json; charset=utf-8",
+               dataType: "json",
+               success: function () {
+                   var index = parent.layer.getFrameIndex(window.name);
+                   parent.layer.close(index);
+                   parent.window.location.reload();
+               },
+               error: function () {
+                   alert("insert serv wrong");
+               }
+           });
+       });
+   }
+
+</script>
+<script>
+    //学科平台目录树
+    spmTree();
+    //高校名称下拉框
+    schoolSelect();
+    //高校联动显示高校代码
+    siIdSelect();
+</script>
+</body>
+</html>

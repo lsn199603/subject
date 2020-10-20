@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="layui/layui_exts/echarts.min.js"></script>
+    <!--<link rel="stylesheet"  type="text/css" href="layui/css/layui.css" media="all">-->
+</head>
+<body>
+<!--<script type="text/javascript" src="layui/layui.js" charset="utf-8"></script>-->
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<h4 style="position: absolute;left: 13%;top: 38%;">重点学科统计图</h4>
+<div id="zdxk" style="position:absolute;width: 33.3%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 45%;top: 38%;">重点实验室统计图</h4>
+<div id="zdsys" style="position:absolute;left: 33.3%;width: 33.3%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 78%;top: 38%;">重点创新团队统计图</h4>
+<div id="zdcx" style="position:absolute;left: 65.6%;width: 33.3%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 5%;top: 90%;">人文社科重点研究基地统计图</h4>
+<div id="rwsk" style="position:absolute;top: 50%;width: 23%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 30%;top: 90%;">工程（技术）研究中心统计图</h4>
+<div id="gcyj" style="position:absolute;top: 50%;left: 25%;width: 23%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 57%;top: 90%;">协同创新中心统计图</h4>
+<div id="sxt" style="position:absolute;top: 50%;left: 50%;width: 23%;height:40%;"></div>
+
+<h4 style="position: absolute;left: 80%;top: 90%;">省产业技术创新研究院统计图</h4>
+<div id="scy" style="position:absolute;top: 50%;left: 75%;width: 23%;height:40%;"></div>
+
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script type="text/javascript">
+    // 重点学科
+    var zdxkChart = echarts.init(document.getElementById('zdxk'));
+
+    zdxkChart.setOption({
+
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['国家重点','省攀升建设','学科群','省重点','省重点建设','部级','省重点扶持']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+
+            {
+                name:'国家重点',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省攀升建设',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'学科群',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省重点',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省重点建设',
+                type:'bar',
+                data: []
+
+            },
+            {
+                name:'部级',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省重点扶持',
+                type:'bar',
+                data: []
+            }
+
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        //重点学科
+        var zdxkSchoolname = [];
+        var gjzd = [];
+        var sps = [];
+        var xkq = [];
+        var szd = [];
+        var szdjs = [];
+        var bj = [];
+        var szdfc = [];
+
+        $.each(data, function (i, j) {
+            //重点学科
+            if (j.a == "" && j.b == "" && j.c == "" && j.d == "" && j.e == "" && j.z == "" && j.y == "") {
+
+            } else {
+                zdxkSchoolname.push(j.schoolname);
+                gjzd.push(j.a);
+                sps.push(j.b);
+                xkq.push(j.c);
+                szd.push(j.d);
+                szdjs.push(j.e);
+                bj.push(j.z);
+                szdfc.push(j.y);
+            }
+
+            // 填入重点学科数据
+            zdxkChart.setOption({
+                xAxis: {
+                    data: zdxkSchoolname
+                },
+                series: [
+
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '国家重点',
+                        data: gjzd
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '省攀升建设',
+                        data: sps
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '学科群',
+                        data: xkq
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '省重点',
+                        data: szd
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '省重点建设',
+                        data: szdjs
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '部级',
+                        data: bj
+                    },
+                    {
+                        // 根据名字对应到相应的系列
+                        name: '省重点扶持',
+                        data: szdfc
+                    }
+                ]
+            });
+        });
+    });
+   /* zdxkChart.on('click', function (params) {
+
+            alert(params.name);
+            layui.use(['layer','jquery','table','excel'], function () {
+                var layer = layui.layer,
+                    $ = layui.jquery;
+                layer.open({
+                    title: ['[' + params.name + ' 国家重点] 详细信息'],
+                    type: 2,
+                    content: 'spmCount-detail.html?schoolname=' + params.name + '?spmId=' + "0101",
+                    maxmin: true,
+                    resize: true,
+                    area: ['60%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            });
+    });*/
+    // 重点实验室
+    var zdsysChart = echarts.init(document.getElementById('zdsys'));
+
+    zdsysChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['国家','教育部','省重点','其他部属']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+
+            {
+                name:'国家',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'教育部',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省重点',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'其他部属',
+                type:'bar',
+                data: []
+            }
+
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var zdsysSchoolname =[];
+        var gj = [];
+        var jyb = [];
+        var szd = [];
+        var qtbs = [];
+
+        $.each(data,function(i,j){
+            if (j.h==""&&j.i==""&&j.j==""&&j.k=="") {
+
+            }else{
+                zdsysSchoolname.push(j.schoolname);
+                gj.push(j.h);
+                jyb.push(j.i);
+                szd.push(j.j);
+                qtbs.push(j.k);
+            }
+
+        });
+
+        // 填入数据
+        zdsysChart.setOption({
+            xAxis: {
+                data: zdsysSchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: '国家',
+                    data: gj
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '教育部',
+                    data: jyb
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省重点',
+                    data: szd
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '其他部属',
+                    data: qtbs
+                }
+            ]
+        });
+    });
+
+    //重点创新团队
+    var zdcxChart = echarts.init(document.getElementById('zdcx'));
+
+    zdcxChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['国家','教育部','省科技厅','省教育厅','1311工程']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+
+            {
+                name:'国家',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'教育部',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省科技厅',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省教育厅',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'1311工程',
+                type:'bar',
+                data: []
+            }
+
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var zdcxSchoolname=[];
+        var gj = [];
+        var jyb = [];
+        var skjt = [];
+        var sjyt = [];
+        var gc = [];
+
+        $.each(data,function(i,j){
+            if (j.l==""&&j.m==""&&j.n==""&&j.o==""&&j.p=="") {
+
+            }else{
+                zdcxSchoolname.push(j.schoolname);
+                gj.push(j.l);
+                jyb.push(j.m);
+                skjt.push(j.n);
+                sjyt.push(j.o);
+                gc.push(j.p);
+            }
+
+        });
+
+        // 填入重点创新团队数据
+        zdcxChart.setOption({
+            xAxis: {
+                data: zdcxSchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: '国家',
+                    data: gj
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '教育部',
+                    data: jyb
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省科技厅',
+                    data: skjt
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省教育厅',
+                    data: sjyt
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '1311工程',
+                    data: gc
+                }
+            ]
+        });
+    });
+
+    //人文社科重点研究基地
+    var rwskChart = echarts.init(document.getElementById('rwsk'));
+
+    rwskChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['教育部','省级']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'教育部',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省级',
+                type:'bar',
+                data: []
+            }
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var rwskSchoolname=[];
+        var jyb = [];
+        var sj = [];
+
+        $.each(data,function(i,j){
+            if (j.f==""&&j.g=="") {
+
+            }else{
+                rwskSchoolname.push(j.schoolname);
+                jyb.push(j.f);
+                sj.push(j.g);
+            }
+
+        });
+
+        // 填入人文社科重点研究基地数据
+        rwskChart.setOption({
+            xAxis: {
+                data: rwskSchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: '教育部',
+                    data: jyb
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省级',
+                    data: sj
+                }
+            ]
+        });
+    });
+
+    //工程（技术）研究中心
+    var gcyjChart = echarts.init(document.getElementById('gcyj'));
+
+    gcyjChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['教育部','省科技厅']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'教育部',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'省科技厅',
+                type:'bar',
+                data: []
+            }
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var gcyjSchoolname=[];
+        var jyb = [];
+        var skjt = [];
+
+        $.each(data,function(i,j){
+            if (j.q==""&&j.r=="") {
+
+            }else{
+                gcyjSchoolname.push(j.schoolname);
+                jyb.push(j.q);
+                skjt.push(j.r);
+            }
+
+        });
+
+        // 填入工程研究中心数据
+        gcyjChart.setOption({
+            xAxis: {
+                data: gcyjSchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: '教育部',
+                    data: jyb
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省科技厅',
+                    data: skjt
+                }
+            ]
+        });
+    });
+
+    //协同创新中心
+    var sxtChart = echarts.init(document.getElementById('sxt'));
+
+    sxtChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['A类','B类']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'A类',
+                type:'bar',
+                data: []
+            },
+            {
+                name:'B类',
+                type:'bar',
+                data: []
+            }
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var sxtSchoolname=[];
+        var Al = [];
+        var Bl = [];
+
+        $.each(data,function(i,j){
+            if (j.s==""&&j.t=="") {
+
+            }else{
+                sxtSchoolname.push(j.schoolname);
+                Al.push(j.s);
+                Bl.push(j.t);
+            }
+
+        });
+
+        // 填入省协同创新中心数据
+        sxtChart.setOption({
+            xAxis: {
+                data: sxtSchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: 'A类',
+                    data: Al
+                },
+                {
+                    // 根据名字对应到相应的系列
+                    name: 'B类',
+                    data: Bl
+                }
+            ]
+        });
+    });
+
+    //省产业技术创新研究院
+    var scyChart = echarts.init(document.getElementById('scy'));
+
+    scyChart.setOption({
+        tooltip : {
+            trigger: 'axis',
+            confine: true,
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+
+        legend: {
+            data:['省产业技术创新研究院']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                axisLabel:{interval: 0,
+                    formatter:function(value){
+                        return value.split("").join("\n");
+                    }},
+                data: []
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'省产业技术创新研究院',
+                type:'bar',
+                barWidth : 30,
+                data: []
+            }
+        ]
+
+    });
+
+    $.get('subjectplatform/spCount?page=1&limit=10','json').done(function (data) {
+        var data = data.data;
+        var scySchoolname=[];
+        var scy = [];
+        /*var Al = [];
+        var Bl = [];*/
+
+        $.each(data,function(i,j){
+            if (j.u=="") {
+
+            }else{
+                scySchoolname.push(j.schoolname);
+                scy.push(j.u);
+            }
+
+        });
+
+        // 填入省产业技术创新研究院数据
+        scyChart.setOption({
+            xAxis: {
+                data: scySchoolname
+            },
+            series: [
+                {
+                    // 根据名字对应到相应的系列
+                    name: '省产业技术创新研究院',
+                    data: scy
+                }
+            ]
+        });
+    });
+
+</script>
+</body>
+</html>

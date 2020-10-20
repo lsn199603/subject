@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <title>教学成果统计对比详细信息</title>
+</head>
+<body>
+<div style="position:absolute;left: 2.5%; width: 95%">
+    <table class="layui-hide" id="demo" lay-filter="test"></table>
+</div>
+</body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['table'],function () {
+        var table = layui.table,
+            $ = layui.$;
+
+        schoolname=location.href.split("?")[1].split("=")[1];
+        time=location.href.split("?")[2].split("=")[1];
+        trGrade=location.href.split("?")[3].split("=")[1];
+
+
+        //执行table分页
+        table.render({
+            elem: '#demo'
+            , id: 'testReload'
+            , height: "auto"
+            , defaultToolbar: []
+            , url: '/teachingresultnation/CountCompareDetail/'+schoolname+'/'+time+'/'+trGrade+'' //数据接口
+            , page: true //开启分页
+            , limit: 5
+            , limits: [5, 10, 15]
+            , title: '高校获奖统计详细信息表'
+            , cols: [[ //表头
+                {align: 'center', title: '编号', type: 'numbers', width:'4.25%'}
+                , {align: 'center', field: 'trName', title: '成果名称',width:'50%'}
+                , {align: 'center', field: 'trPerson', title: '获奖人', width:'36%'}
+                , {align: 'center', field: 'trDate', title: '获奖时间',width:'10.2%'}
+                , {align: 'center', field: 'trGrade', title: '级别',width:'10%'}
+            ]]
+            //表头颜色
+            , done: function () {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight': 'bold'});
+                if (!(decodeURI(trGrade) == "统计")){
+                    $("[data-field='trGrade']").css('display','none');
+                }
+            }
+            , paresData: function (res) {
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                };
+            }
+        });
+    });
+</script>
+</html>

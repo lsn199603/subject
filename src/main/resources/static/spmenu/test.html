@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1">
+    <title>学科平台目录</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet"  type="text/css" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/font/dtreefont.css">
+    <style type="text/css">
+        .select-test{position: absolute;max-height: 500px;height: 350px;overflow: auto;width: 100%;z-index: 123;display: none;border:1px solid silver;top: 42px;}
+        .layui-show{display: block!important;}
+    </style>
+</head>
+<body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<div class="layui-form layui-form-panel">
+    <div class="layui-form-item">
+        <label class="layui-form-label">城市：</label>
+        <div class="layui-input-block">
+            <div class="layui-unselect layui-form-select" id="city">
+                <div class="layui-select-title">
+                    <input type="text" name="city" id="input_city" placeholder="请选择" readonly="" class="layui-input layui-unselect">
+                    <i class="layui-edge"></i>
+                </div>
+            </div>
+            <div class="layui-card select-test" id="test">
+                <div class="layui-card-body">
+                    <div id="toolbarDiv"><ul id="selectTree" class="dtree" data-id="10" style="width: 100%;"></ul></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.extend({
+        dtree: '../layui/layui_exts/layui_ext/dtree/dtree'
+    }).use(['dtree','layer','jquery'], function () {
+        var dtree = layui.dtree,
+            layer = layui.layer,
+            $ = layui.jquery;
+            dtree.render({
+            elem: "#selectTree",
+            isJump:true,
+                accordion:true,
+            dataStyle: "layuiStyle",
+            dataFormat: "list",
+            response:{message:"msg",statusCode:0},
+            skin: "zdy",
+            iconfont:["dtreefont","layui-icon","iconfont"],
+            iconfontStyle:[{
+                snode:{
+                    leaf: "dtree-icon-xiangmuxiaoxi",
+                    node:{
+                        open:"icon-appreciate"
+                    }
+                }
+            }],
+            url: "http://localhost:8080//subjectplatformmenu/queryAll"
+        });
+        $("#city").on("click",function(){
+            $(this).toggleClass("layui-form-selected");
+            $("#test").toggleClass("layui-show layui-anim layui-anim-upbit");
+        });
+        dtree.on("node(selectTree)", function(obj){
+            $("#input_city").val(obj.param.context);
+            $("#city").toggleClass("layui-form-selected");
+            $("#test").toggleClass("layui-show layui-anim layui-anim-upbit");
+        });
+    });
+</script>
+</body>
+</html>

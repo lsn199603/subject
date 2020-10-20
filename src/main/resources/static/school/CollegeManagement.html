@@ -1,0 +1,469 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>高校信息管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="shortcut icon" th:href="./images/favicon.ico" type="image/x-icon">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="renderer" content="webkit">
+
+
+    <!-- 引入css -->
+
+
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/font/dtreefont.css">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style>
+        body {
+            margin: 10px;
+        }
+        .layui-table-tool-temp {
+            padding-right: 0;
+            margin-right: 0;
+        }
+        .yutons,
+        .layui-btn-sm{
+            margin-top: -2px;
+        }
+        .yutons-header-tool{
+            margin-top: -2px;
+            width: 30px !important;
+            height: 30px !important;
+            background-color: #ffffff;
+        }
+        .layui-tale-tool-panel{
+            left: auto;
+            right: -1px;
+        }
+        .yutons-btn-margin-right{
+            margin-right: 10px;
+            line-height: 40px;
+        }
+        .select-test{position: absolute;padding-left:-10px; max-height: 500px;height: 350px;overflow: auto;width: 220px;z-index: 123;display: none;border:1px solid silver;top: 42px;}
+        .layui-show{display: block!important;}
+
+        .layui-table-cell .layui-form-checkbox[lay-skin="primary"]{
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="layui-card">
+    <!--页面名称-->
+<div class="layui-card-header" >
+    <i class="layui-icon layui-icon-rate-half"></i><strong>高校信息管理</strong>
+    <i style="float:right;" class="layui-icon layui-icon-refresh-3 refresh-btn"></i>
+</div>
+    <div class="layui-form-pane demoTable">
+
+        <!--高校名称搜索输入框-->
+        <div class="layui-form-item" style="position: absolute;left: 30%;top: 12%;">
+            <label class="layui-form-label" style="color: #fff;background-color: #009688;border-width: 1.5px;border-color: #009f95;height: 41px"><strong>高校名称</strong></label>
+            <div class="layui-input-inline">
+                <input type="text" style="border-color: #009688;border-width: 1.5px;height: 41px" id="siName" name="siName" lay-verify="title" autocomplete="off" placeholder="请输入高校名称" class="layui-input">
+            </div>
+            <div class="layui-inline" style="position: absolute;left: 115%;top: 12%;">
+                <button class="layui-btn layui-btn-sm"  data-type="reload" style="height: 36px">
+                    <i class="layui-icon layui-icon-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js" charset="utf-8"></script>
+<script src="../js/myJs.js" charset="utf-8"></script>
+
+    <!--对每条信息的操作按钮，事件对应到分页表工具栏-->
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">详细</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+    <!--分页表定义-->
+<div style="position: absolute;top: 20%;width: 98.5%">
+<table class="layui-hide" id="demo" lay-filter="test"></table>
+</div>
+    <!--头工具栏操作按钮-->
+<script type="text/html" id="toolbarDemo">
+
+    <div class="layui-row" style="height: 3%">
+        <div class="layui-col-md2 layui-col-sm3 layui-col-xs6" style="text-align: left;padding-left: 10px;">
+            <div class="layui-input-inline yutons-btn-margin-right">
+                <!--批量添加按钮-->
+                <span class="layui-btn layui-btn-primary layui-btn-sm layui-icon layui-icon-add-1" lay-event="addAll" title="批量添加"></span>
+            </div>
+            <!--批量删除按钮-->
+            <div class="layui-input-inline yutons-btn-margin-right">
+
+                <span class="layui-btn layui-btn-primary layui-btn-sm layui-icon layui-icon-delete" lay-event="delAll" title="批量添加"></span>
+            </div>
+        </div>
+        <div class="layui-col-md10 layui-col-sm9 layui-col-xs6" style="text-align: right;">
+           <!--筛选，导出，打印-->
+            <div class="layui-input-inline yutons-btn-margin-right">
+				<span class="layui-inline yutons-header-tool" title="筛选列" lay-event="LAYTABLE_COLS">
+							<i class="layui-icon layui-icon-cols"></i></span>
+                <span class="layui-inline yutons-header-tool" title="导出" lay-event="table_export">
+				                    <i class="layui-icon layui-icon-export"></i></span>
+                <span class="layui-inline yutons-header-tool" title="打印" lay-event="LAYTABLE_PRINT">
+							<i class="layui-icon layui-icon-print"></i>
+				</span>
+            </div>
+        </div>
+    </div>
+</script>
+<script>
+    layui.config({
+        base: '../layui/layui_exts/',
+    }).use(['table','excel','tree','form'],function () {
+        var table = layui.table,
+            $ = layui.$,
+            excel = layui.excel,
+            tree = layui.tree;
+            form = layui.form;
+
+        //执行table分页
+        table.render({
+            elem: '#demo'
+            , id: 'testReload'
+            , height: "auto"
+            , toolbar: "#toolbarDemo"
+            , defaultToolbar: []
+            , url: '/schoolinformation/list2' //数据接口
+            , page: true //开启分页
+            , limit: 5
+            , limits: [5, 10, 15]
+            , title: '高校管理信息表'
+            , cols: [[ //表头
+                {align: 'center', type: "checkbox", fixed: "left", width: '3%', filter: 'idAll'}
+                , {align: 'center', field: 'id', title: 'ID', hide: true}
+                , {align: 'center', title: '编号', type: 'numbers', width: '6%'}
+                , {align: 'center', field: 'siId', title: '高校代码', width: '9%'}
+                , {align: 'center', field: 'siName', title: '高校名称', width: '16%'}
+                , {align: 'center', field: 'siPrincipal', title: '负责人', width: '12%'}
+                , {align: 'center', field: 'siPPhone', title: '负责人电话', width: '14%'}
+                , {align: 'center', field: 'siContact', title: '联系人', width: '12%'}
+                , {align: 'center', field: 'siCPhone', title: '联系人电话', width: '14%'}
+                , {align: 'center', field: 'siRemark', title: '备注', hide: true}
+                , {align: 'center', fixed: 'right', title:'操作', width: '14.25%', toolbar: '#barDemo'}
+
+            ]]
+            //表头颜色
+             ,done: function () {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight':'bold'})
+            }
+            , paresData: function (res) {
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                };
+            }
+        });
+        //表格重载
+       var $ = layui.$, active = {
+            reload: function () {
+                var demoReload = $('#siName').val();
+
+                //执行重载
+                table.reload('testReload',{
+                    url:'/schoolinformation/list1'
+                    ,where:{
+                        siName: demoReload,
+                    }
+                    ,page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+
+                });
+            }
+        };
+        $('.demoTable .layui-btn').on('click',function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //监听头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id),
+                data = checkStatus.data; //获取选中的数据
+            switch (obj.event) {
+                //Excel导出
+                case 'table_export':
+                    exportFile('demo');
+                    break;
+                 //批量删除
+                case 'delAll':
+                    if (data.length === 0) {
+                        layer.msg('请选择一行');
+                    } else {
+                        layer.confirm('您确定删除吗？',{title:'温馨提示',skin: 'layui-layer-molv'}, function removeAll() {
+
+                            //将所有复选框的默认值放入id数组中
+                            var ids = new Array();
+                            for (var i = 0; i < data.length; i++) {
+                                ids.push(data[i].id);
+                            }
+                            $.post('/schoolinformation/removeAll/' + ids, function (r) {
+                                if (r) {
+                                    layer.msg("删除成功", {icon: 6, shade: 0.5, time: 1500}, function () {
+                                        window.location.reload();
+                                    })
+                                } else {
+                                    layer.msg("删除失败")
+                                }
+                            }, 'json');
+                        });
+                    }
+                    break;
+                //批量添加
+                case 'addAll':
+                    layer.open({
+                        title: ['添加信息', 'font-size:18px;'],
+                        type: 2,
+                        content: 'CollegeManagement-add.html',
+                        resize: true,
+                        area: ['100%', '100%'],
+                        skin: 'layui-layer-molv',
+                        cancel: function (index, layero) {
+                            layer.confirm('您确定关闭吗', {title:'温馨提示',skin: 'layui-layer-molv'},function() {//只有当点击confirm框的确定时，该层才会关闭
+                                layer.close(index);
+                                layer.closeAll('dialog');
+
+                            });
+                            return false;
+                        }
+
+                    });
+                    break;
+            }
+
+        });
+
+        //监听工具栏事件
+        table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            //单条数据详细信息
+            if (layEvent === 'detail') {
+                layer.open({
+                    title: ['详细信息', 'font-size:18px;'],
+                    type: 2,
+                    content: 'CollegeManagement-detail.html?id=' + data.id,
+                    maxmin: true,
+                    resize: true,
+                    area: ['50%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+                //删除单条数据
+            } else if (layEvent === 'del') {
+                layer.confirm('您确定删除吗？', {title:'温馨提示',skin: 'layui-layer-molv'},function removeThis() {
+                    var id = data.id;
+                    $.post('/schoolinformation/remove/' + id, function (r) {
+                        if (r) {
+                            layer.msg("删除成功", {icon: 6, shade: 0.5, time: 1500}, function () {
+                                window.location.reload();
+                            })
+                        } else {
+                            layer.msg("删除失败")
+                        }
+                    }, 'json');
+
+                });
+                //编辑单条数据
+            } else if (layEvent === 'edit') {
+                layer.open({
+                    title: ['编辑信息', 'font-size:18px;'],
+                    type: 2,
+                    content: 'CollegeManagement-edit.html?id=' + data.id,
+                    maxmin: true,
+                    resize: true,
+                    area: ['50%', '90%'],
+                    skin: 'layui-layer-molv',
+                });
+
+            }
+        });
+
+        if (!Array.from) {
+            Array.from = function (el) {
+                return Array.apply(this, el);
+            }
+        }
+
+        //表格导出
+        function exportFile(id) {
+            $.ajax({
+                url: '/schoolinformation/queryAll'
+                , dataType: 'json'
+                , success(res) {
+                    var data = res.data;
+                    var arr = [{
+                        sign:{
+                            v: '高校信息管理表',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                },
+                                font: {
+                                    sz: 18
+                                }
+                            }
+                        },
+                        siId: '',
+                        siName: '',
+                        siPrincipal: '',
+                        siPPhone: '',
+                        siContact: '',
+                        siCPhone: '',
+                        siRemark: ''
+                    },
+                        {
+                            sign: {
+                                v: '编号',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siId:{
+                                v: '高校代码',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siName: {
+                                v: '高校名称',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+
+                            siPrincipal: {
+                                v: '负责人',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siPPhone: {
+                                v: '负责人电话',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siContact: {
+                                v: '联系人',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siCPhone: {
+                                v: '联系人电话',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            siRemark: {
+                                v: '备注',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                    data = excel.filterExportData(data, [
+                        'sign'
+                        ,'siId'
+                        , 'siName'
+                        , 'siPrincipal'
+                        , 'siPPhone'
+                        , 'siContact'
+                        , 'siCPhone'
+                        , 'siRemark'
+                    ]);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].sign = i+1;
+                    }
+                    var mergeConf = excel.makeMergeConfig([
+                        ['A1','H1']
+                    ]);
+                    // 2. B列宽 150，F列宽200，默认80
+                    var colConf = excel.makeColConfig({
+                        A: 40,
+                        C: 150,
+                        E: 100,
+                        H: 150
+                    },80);
+                    // 3. 第1行行高40，第二行行高30，默认20
+                    var rowConf = excel.makeRowConfig({
+                        1: 40
+                    },40);
+                    excel.setExportCellStyle(data,'A1:H'+data.length,{
+                        s: {
+                            alignment: {
+                                horizontal: 'center',
+                                vertical: 'center'
+                            }
+                        }
+                    });
+                    excel.exportExcel(arr.concat(data)
+                        , '高校信息管理表.xlsx', 'xlsx', {
+                            extend: {
+                                // extend 中可以指定某个 sheet 的属性，如果不指定 sheet 则所有 sheet 套用同一套属性
+                                '!merges': mergeConf
+                                , '!cols': colConf
+                                , '!rows': rowConf
+                            }
+                        });
+                },
+                error() {
+                    layer.alert('获取数据失败');
+                }
+            });
+        }
+
+    });
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.education.subject.mapper.MasterinformationMapper">
+    <select id="MasterCount" resultType="com.education.subject.entity.MasterCount">
+    SELECT
+    si_name as schoolname,
+    count(IF(m_grade='一级硕士点',m_grade,NULL)) as first,
+    count(IF(m_grade='二级硕士点',m_grade,NULL)) as second,
+    count(IF(m_grade='一级硕士点',m_grade,NULL))+ count(IF(m_grade='二级硕士点',m_grade,NULL))
+    as total
+    FROM
+	masterinformation
+    GROUP BY
+    si_name
+    order by MAX(si_id) ASC
+    </select>
+</mapper>

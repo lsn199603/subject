@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <title>科学技术奖成果统计对比</title>
+</head>
+<body>
+<div style="position:absolute;left: 2.5%; width: 95%">
+    <table class="layui-hide" id="demo" lay-filter="test"></table>
+</div>
+</body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['table'],function () {
+        var table = layui.table,
+            $ = layui.$;
+
+        schoolname=location.href.split("?")[1].split("=")[1];
+        time=location.href.split("?")[2].split("=")[1];
+        trGrade=location.href.split("?")[3].split("=")[1];
+
+
+        //执行table分页
+        table.render({
+            elem: '#demo'
+            , id: 'testReload'
+            , height: "auto"
+            , defaultToolbar: []
+            , url: '/scienceresult/CountCompareDetail/'+schoolname+'/'+time+'/'+trGrade+'' //数据接口
+            , page: true //开启分页
+            , limit: 5
+            , limits: [5, 10, 15]
+            , title: '高校获奖统计详细信息表'
+            , cols: [[ //表头
+                {align: 'center', title: '编号', type: 'numbers', width: '5%'}
+                , {align: 'center', field: 'stName', title: '成果名称', width: '45%'}
+                , {align: 'center', field: 'stRecommend', title: '推荐单位', width: '20%'}
+                , {align: 'center', field: 'stGrade', title: '级别' ,width: '15%'}
+                , {align: 'center', field: 'stPerson', title: '获奖人', width: '20%'}
+                , {align: 'center', field: 'stClass', title: '类别', width: '15%'}
+                , {align: 'center', field: 'stTime', title: '获奖时间', width: '15%'}
+            ]]
+            //表头颜色
+            , done: function () {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight': 'bold'});
+                if (!(decodeURI(trGrade) == "统计")){
+                    $("[data-field='stGrade']").css('display','none');
+                }
+            }
+            , paresData: function (res) {
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                };
+            }
+        });
+    });
+</script>
+</html>

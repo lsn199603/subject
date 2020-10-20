@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>硕士点信息统计</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet"  type="text/css" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../css/main.css" media="all">
+</head>
+<body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<script src="../js/myJs.js" charset="utf-8"></script>
+<div class="layui-card">
+    <div class="layui-card-header" >
+        <i class="layui-icon layui-icon-rate-half"></i><strong>硕士点信息统计</strong>
+        <i style="float:right;" class="layui-icon layui-icon-refresh-3 refresh-btn"></i>
+    </div>
+    <div style="position: absolute;left: 1%; top: 10%;width: 98%">
+        <table class="layui-hide layui-table" id="demo" lay-filter="test"></table>
+    </div>
+</div>
+<!--头工具栏操作按钮-->
+<script type="text/html" id="toolbarDemo">
+
+    <div class="layui-row" style="height: 3%">
+        <div class="layui-col-md10 layui-col-sm9 layui-col-xs6" style="text-align: right;width: 110%;">
+            <!--筛选，导出，打印-->
+            <div class="layui-input-inline yutons-btn-margin-right">
+				<span class="layui-inline yutons-header-tool" title="筛选列" lay-event="LAYTABLE_COLS">
+							<i class="layui-icon layui-icon-cols"></i></span>
+                <span class="layui-inline yutons-header-tool" title="导出" lay-event="table_export">
+				                    <i class="layui-icon layui-icon-export"></i></span>
+                <span class="layui-inline yutons-header-tool" title="打印" lay-event="LAYTABLE_PRINT">
+							<i class="layui-icon layui-icon-print"></i>
+				</span>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script>
+
+    layui.config({
+        base: '../layui/layui_exts/',
+    }).use(['table','excel','form'],function () {
+        var table = layui.table,
+            $ = layui.$,
+            excel = layui.excel,
+            form = layui.form;
+        //表格
+        table.render({
+            elem: '#demo'
+            ,url: '/masterinformation/mastercount'
+            , id: 'testReload'
+            ,toolbar: "#toolbarDemo"
+            ,page: false
+            , defaultToolbar: []
+            ,title: '博士点信息统计'
+            ,totalRow: true
+            ,cols: [[
+                {align:'center',title:'编号',type:'numbers',width:'5%',totalRowText: '合计'}
+                ,{align:'center',field:'schoolname',title:'高校名称',width:'40%'}
+                ,{align:'center',field:'first',title:'一级博士点',width:'25%',totalRow: true,event: 'first',style:'cursor: pointer;'}
+                ,{align:'center',field:'second',title:'二级博士点',width:'25%',totalRow: true,event: 'second',style:'cursor: pointer;'}
+                , {align:'center',field:'total',title:'合计',width:'5.3%',totalRow: true,event: 'total', style:'cursor: pointer;'}
+            ]]
+            ,done: function (res) {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight':'bold'});
+            }
+            ,paresData:function () {
+                return{
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                }
+            }
+        });
+
+        //监听头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id),
+                data = checkStatus.data; //获取选中的数据
+            switch (obj.event) {
+                //Excel导出
+                case 'table_export':
+                    exportFile('demo');
+                    break;
+            }
+        });
+
+        //监听单元格事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+
+            if (obj.event === 'first'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 一级硕士点] 详细信息'],
+                    type: 2,
+                    content: 'MasterManagementCount-detail.html?schoolname=' + data.schoolname+'?mGrade='+"一级硕士点",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'second'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 二级硕士点] 详细信息'],
+                    type: 2,
+                    content: 'MasterManagementCount-detail.html?schoolname=' + data.schoolname+'?mGrade='+"二级硕士点",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }else if (obj.event === 'total'){
+                layer.open({
+                    title: ['['+ data.schoolname +' 硕士点] 详细信息'],
+                    type: 2,
+                    content: 'MasterManagementCount-detail.html?schoolname=' + data.schoolname+'?mGrade='+"统计",
+                    maxmin: true,
+                    resize: true,
+                    area: ['80%', '90%'],
+                    skin: 'layui-layer-molv'
+                });
+            }
+
+        });
+
+        //表格导出
+        function exportFile() {
+            $.ajax({
+                url: '/masterinformation/mastercount'
+                , dataType: 'json'
+                , success(res) {
+                    var data = res.data;
+                    var arr = [{
+                        number:{
+                            v: '硕士点信息统计表',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                },
+                                font: {
+                                    sz: 18
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        first: '',
+                        second: '',
+                        total: ''
+                    },
+                        {
+                            number:{
+                                v: '编号',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            schoolname:{
+                                v: '高校名称',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            first: {
+                                v: '一级博士点',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            second: {
+                                v: '二级博士点',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            },
+                            total: {
+                                v: '合计',
+                                s: {
+                                    alignment: {
+                                        horizontal: 'center',
+                                        vertical: 'center'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                    data = excel.filterExportData(data, [
+                        'number',
+                        'schoolname',
+                        'first',
+                        'second',
+                        'total'
+                    ]);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].number = i+1;
+                    }
+                    var mergeConf = excel.makeMergeConfig([
+                        ['A1','E1']
+                    ]);
+                    // 2. B列宽 150，F列宽200，默认80
+                    var colConf = excel.makeColConfig({
+                        A: 40,
+                        B: 100,
+                        C: 110,
+                        D: 110
+                    }, 80);
+                    // 3. 第1行行高40，第二行行高30，默认20
+                    var rowConf = excel.makeRowConfig({
+                        1: 40
+                    },40);
+                    // 4. 公式的用法
+                    data.push({
+                        number :{
+                            v: '合计',
+                            s: {
+                                alignment: {
+                                    horizontal: 'center',
+                                    vertical: 'center'
+                                }
+                            }
+                        },
+                        schoolname: '',
+                        first: {t: 'n', f: 'SUM(C3:C'+(data.length+2)+')'},
+                        second: {t: 'n', f: 'SUM(D3:D'+(data.length+2)+')'},
+                        total:  {t: 'n', f: 'SUM(E3:E'+(data.length+2)+')'}
+                    });
+                    excel.setExportCellStyle(data,'A1:B'+data.length,{
+                        s: {
+                            alignment: {
+                                horizontal: 'center',
+                                vertical: 'center'
+                            }
+                        }
+                    });
+                    excel.exportExcel(arr.concat(data)
+                        , '硕士点信息统计表.xlsx', 'xlsx', {
+                            extend: {
+                                // extend 中可以指定某个 sheet 的属性，如果不指定 sheet 则所有 sheet 套用同一套属性
+                                '!merges': mergeConf
+                                , '!cols': colConf
+                                , '!rows': rowConf
+                            }
+                        });
+                },
+                error() {
+                    layer.alert('获取数据失败');
+                }
+            });
+        }
+    });
+</script>
+<script type="text/html" id="countTest">
+    <a href="http://localhost:8080/doctorinformation/doctorcount" class="layui-table-link"></a>
+
+
+</script>
+</body>
+</html>

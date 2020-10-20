@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.education.subject.mapper.SubjectplatformMapper">
+    <!--学科平台信息查询统计-->
+    <select id="selectSpCount" resultType="com.education.subject.entity.spCount">
+    SELECT
+    si_name as schoolname,
+    /* 01重点学科*/
+    count(IF(spm_id='0101',spm_id,NULL)) as A, -- 国家重点
+    count(IF(spm_id='0102',spm_id,NULL)) as B, -- 省攀升建设
+    count(IF(spm_id='0103',spm_id,NULL)) as C, -- 学科群
+    count(IF(spm_id='0104',spm_id,NULL)) as D, -- 省重点
+    count(IF(spm_id='0105',spm_id,NULL)) as E, -- 省重点建设
+    count(IF(spm_id='0106',spm_id,NULL)) as Z, -- 部级
+    count(IF(spm_id='0107',spm_id,NULL)) as Y, -- 省重点扶持
+    /* 02人文社科重点研究基地*/
+    count(IF(spm_id='0201',spm_id,NULL)) as F, -- 教育部
+    count(IF(spm_id='0202',spm_id,NULL)) as G, -- 省级
+    /* 03重点实验室*/
+    count(IF(spm_id='0301',spm_id,NULL)) as H, -- 国家
+    count(IF(spm_id='0302',spm_id,NULL)) as I, -- 教育部
+    count(IF(spm_id='0303',spm_id,NULL)) as J, -- 省重点
+    count(IF(spm_id='0304',spm_id,NULL)) as K, -- 其他部属
+    /* 04重点创新团队*/
+    count(IF(spm_id='0401',spm_id,NULL)) as L, -- 国家
+    count(IF(spm_id='0402',spm_id,NULL)) as M, -- 教育部
+    count(IF(spm_id='0403',spm_id,NULL)) as N, -- 省科技厅
+    count(IF(spm_id='0404',spm_id,NULL)) as O, -- 省教育厅
+    count(IF(spm_id='0405',spm_id,NULL)) as P, -- 1311工程
+    /* 05工程(技术)研究中心*/
+    count(IF(spm_id='0501',spm_id,NULL)) as Q, -- 教育部
+    count(IF(spm_id='0502',spm_id,NULL)) as R, -- 省科技厅
+    /* 06省协同创新中心*/
+    count(IF(spm_id='0601',spm_id,NULL)) as S, -- A类
+    count(IF(spm_id='0602',spm_id,NULL)) as T, -- B类
+    /* 07工程(技术)研究中心*/
+    count(IF(spm_id='07',spm_id,NULL)) as U -- 省产业技术创新研究院（战略联盟）
+    FROM
+    subjectplatform
+    where sign = 0
+    GROUP BY
+    si_name
+     order by MAX(si_id) ASC
+    </select>
+    <!--根据学校名称学科平台信息查询统计-->
+    <select id="selectSpCountBySiName" resultType="com.education.subject.entity.spCount">
+    SELECT
+    si_name as schoolname,
+    /* 01重点学科*/
+    count(IF(spm_id='0101',spm_id,NULL)) as A, -- 国家重点
+    count(IF(spm_id='0102',spm_id,NULL)) as B, -- 省攀升建设
+    count(IF(spm_id='0103',spm_id,NULL)) as C, -- 学科群
+    count(IF(spm_id='0104',spm_id,NULL)) as D, -- 省重点
+    count(IF(spm_id='0105',spm_id,NULL)) as E, -- 省重点建设
+    count(IF(spm_id='0106',spm_id,NULL)) as Z, -- 部级
+    count(IF(spm_id='0107',spm_id,NULL)) as Y, -- 省重点扶持
+    /* 02人文社科重点研究基地*/
+    count(IF(spm_id='0201',spm_id,NULL)) as F, -- 教育部
+    count(IF(spm_id='0202',spm_id,NULL)) as G, -- 省级
+    /* 03重点实验室*/
+    count(IF(spm_id='0301',spm_id,NULL)) as H, -- 国家
+    count(IF(spm_id='0302',spm_id,NULL)) as I, -- 教育部
+    count(IF(spm_id='0303',spm_id,NULL)) as J, -- 省重点
+    count(IF(spm_id='0304',spm_id,NULL)) as K, -- 其他部属
+    /* 04重点创新团队*/
+    count(IF(spm_id='0401',spm_id,NULL)) as L, -- 国家
+    count(IF(spm_id='0402',spm_id,NULL)) as M, -- 教育部
+    count(IF(spm_id='0403',spm_id,NULL)) as N, -- 省科技厅
+    count(IF(spm_id='0404',spm_id,NULL)) as O, -- 省教育厅
+    count(IF(spm_id='0405',spm_id,NULL)) as P, -- 1311工程
+    /* 05工程(技术)研究中心*/
+    count(IF(spm_id='0501',spm_id,NULL)) as Q, -- 教育部
+    count(IF(spm_id='0502',spm_id,NULL)) as R, -- 省科技厅
+    /* 06省协同创新中心*/
+    count(IF(spm_id='0601',spm_id,NULL)) as S, -- A类
+    count(IF(spm_id='0602',spm_id,NULL)) as T, -- B类
+    /* 07工程(技术)研究中心*/
+    count(IF(spm_id='07',spm_id,NULL)) as U -- 省产业技术创新研究院（战略联盟）
+    FROM
+    subjectplatform
+    where sign = 0 AND si_name like "%"#{siName}"%"
+    GROUP BY
+    si_name
+
+    </select>
+</mapper>

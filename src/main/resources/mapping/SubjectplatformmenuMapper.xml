@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.education.subject.mapper.SubjectplatformmenuMapper">
+    <!--查询学科平目录的所有信息到table-->
+    <select id="selectSpmTable" resultType="com.education.subject.entity.spmTable">
+    SELECT a.spm_id as id,a.spm_name as spmName, b.spm_name as parentName
+    from subjectplatformmenu a
+    JOIN subjectplatformmenu b ON a.spm_parent_id = b.spm_id
+    where  a.sign = 0
+    </select>
+
+    <!--根据id查询学科平目录的所有信息到table-->
+    <select id="selectSpmTableById" resultType="com.education.subject.entity.spmTable">
+    SELECT a.spm_id as id,a.spm_name as spmName, b.spm_name as parentName
+    from subjectplatformmenu a
+    JOIN subjectplatformmenu b ON a.spm_parent_id = b.spm_id
+    WHERE a.spm_id LIKE #{nodeId}"%" AND a.sign = 0
+    </select>
+    <!--根据名称查询学科平目录的所有信息到table-->
+    <select id="selectSpmTableByName" resultType="com.education.subject.entity.spmTable">
+     SELECT a.spm_id as id,a.spm_name as spmName, b.spm_name as parentName
+    from subjectplatformmenu a
+    JOIN subjectplatformmenu b ON a.spm_parent_id = b.spm_id
+    WHERE a.sign = 0 AND a.spm_name LIKE "%"#{spmName}"%"
+    </select>
+</mapper>

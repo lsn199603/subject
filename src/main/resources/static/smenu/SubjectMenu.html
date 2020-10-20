@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1">
+    <title>学科目录</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../css/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet"  type="text/css" href="../layui/css/layui.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../css/main.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" type="text/css" href="../layui/layui_exts/layui_ext/dtree/font/dtreefont.css">
+</head>
+<body>
+<script type="text/javascript" src="../layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/plugins/jquery-3.3.1.min.js"></script>
+<div class="layui-card">
+    <div class="layui-card-header" >
+        <i class="layui-icon layui-icon-rate-half"></i><strong>学科目录管理</strong>
+        <i style="float:right;" class="layui-icon layui-icon-refresh-3 refresh-btn"></i>
+    </div>
+    <div class="layui-card-body layui-row" >
+        <div class="layui-col-lg3 layui-col-sm3">
+            <div class="layui-card timo-nav-tree">
+                <div class="layui-card-header">学科目录</div>
+                <div class="layui-card-body">
+                    <ul id="demoTree" class="dtree" data-id="0"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-lg9 layui-col-sm9">
+            <div class="layui-row timo-card-screen">
+                <div class="pull-left layui-form-pane timo-search-box">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title"  placeholder="请输学科名称" autocomplete="off" class="layui-input" id="searchInput">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-sm" id="search_btn" style="height: 36px"data-type="reload">
+                            <i class="layui-icon layui-icon-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="pull-right screen-btn-group">
+                    <button class="layui-btn " data-title="添加学科" onclick="addsm()">
+                        <i class="fa fa-plus"></i> 添加</button>
+                </div>
+            </div>
+            <table class="layui-hide" id="demo" lay-filter="test"></table>
+        </div>
+    </div>
+</div>
+
+<!--table行工具-->
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">详细</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!--添加学科-->
+<script>
+    function addsm() {
+        layui.use(['layer','jquery'],function () {
+            var  layer = layui.layer,
+                $ = layui.jquery;
+            layer.open({
+                title: ['添加学科', 'font-size:18px;'],
+                type: 2,
+                content: 'SubjectMenu-add.html',
+                maxmin: true,
+                resize: true,
+                area: ['50%', '85%'],
+                skin: 'layui-layer-molv'
+            });
+        });
+    }
+</script>
+<script>
+    layui.extend({
+        dtree: '../layui/layui_exts/layui_ext/dtree/dtree'
+    }).use(['dtree','layer','jquery','table'], function () {
+        var dtree = layui.dtree,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+        var DemoTree = dtree.render({
+            elem: "#demoTree",
+            type: "all",
+            dataStyle: "layuiStyle",
+            dot: false,
+            toolbar:true,
+            initLevel: 1,
+            toolbarStyle:{title: "学科平台",area: ["50%", "400px"]},
+            skin: "zdy",
+            iconfont:["dtreefont","layui-icon","iconfont"],
+            iconfontStyle:[{
+                snode:{
+                    leaf: "dtree-icon-xiangmuxiaoxi",
+                    node:{
+                        open:"icon-appreciate"
+                    }
+                }
+            }],
+            dataFormat: "list",
+            response:{message:"msg",statusCode:0},
+            url: "/subjectmenu/queryAll",
+            //搜索学科平台
+            done: function (data, obj) {
+                /*$("#search_btn").unbind("click");
+                $("#search_btn").click(function () {
+                    var value = $("#searchInput").val();
+                    if (value){
+                        var flag = DemoTree.searchNode(value);
+                        if (!flag){
+                            layer.msg("该名称节点不存在!",{icon:5});}
+                    } else {
+                        DemoTree.menubarMethod().refreshTree();
+                    }
+                });*/
+            }
+        });
+        dtree.on("node(demoTree)",function (obj) {
+           /* if (!obj.param.leaf){
+                var  $div = obj.dom;
+                DemoTree.clickSpread($div);
+            }else {
+                layer.msg("没有下级学科平台！")
+            }*/
+            table.reload('testReload',{
+                url:'/subjectmenu/list2'
+                ,page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where:{
+                    nodeId: obj.param.nodeId
+                }
+            });
+        });
+        //表格
+        table.render({
+            elem: '#demo'
+            ,url: '/subjectmenu/list1'
+            ,page:true
+            ,limit:5
+            ,defaultToolbar:['filter', 'print']
+            ,limits: [5,10,15]
+            ,title: '学科目录'
+            ,cols: [[
+                {type: "checkbox", width: 40, filter: 'idAll'}
+                ,{align:'center',title:'编号',type:'numbers',width: 60}
+                ,{align:'center',field:'id',title:'学科编号',hide:true}
+                ,{align:'center',field:'smName',title:'学科名称'}
+                ,{align:'center',field:'parentName',title:'上级学科名称'}
+                ,{align:'center',fixed:'right',width: 160,toolbar:'#barDemo',title:'操作'}
+            ]]
+            ,id:'testReload'
+            ,done: function () {
+                $('th').css({'background-color': '#009688', 'color': '#fff', 'font-weight':'bold'})
+            }
+            ,paresData:function () {
+                return{
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.count,
+                    "data": res.data
+                }
+            }
+        });
+        //表格重载
+        var $ = layui.$, active = {
+            reload: function () {
+                var value = $("#searchInput").val();
+
+                //执行重载
+                table.reload('testReload',{
+                    url:'/subjectmenu/list3'
+                    ,where:{
+                        smName: value
+                    }
+                    ,page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                });
+            }
+        };
+        $("#search_btn").on('click',function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        //监听行事件
+        table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'detail') {
+                layer.open({
+                    title: ['详细信息', 'font-size:18px;'],
+                    type: 2,
+                    content: 'SubjectMenu-detail.html?id=' + data.id,
+                    maxmin: true,
+                    area: ['50%', '85%'],
+                    skin: 'layui-layer-molv',
+                });
+            } else if (layEvent === 'del') {
+                layer.confirm('您确定删除吗？', {title:'温馨提示',skin: 'layui-layer-molv'},function removeThis() {
+                    var id = data.id;
+                    $.post('/subjectmenu/del/' + id, function (r) {
+                        switch (r) {
+                            //0删除失败  1此节点有子节点不能删除 2删除成功
+                            case 0:  layer.msg("删除失败",{icon: 5,shade: 0.5, time: 2000})
+                                break;
+                            case 1: layer.msg("此节点有子节点,不能删除",{icon: 4,shade: 0.5, time: 2000})
+                                break;
+                            case 2:  layer.msg("删除成功",{icon: 6,shade: 0.5, time: 2000},function () {
+                                window.location.reload();
+                            })
+                                break;
+                        }
+                    }, 'json');
+
+                });
+            } else if (layEvent === 'edit') {
+                layer.open({
+                    title: ['编辑信息', 'font-size:18px;'],
+                    type: 2,
+                    content: 'SubjectMenu-edit.html?id=' + data.id,
+                    maxmin: true,
+                    area: ['50%', '85%'],
+                    skin: 'layui-layer-molv',
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>登录</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="css/main.css"  media="all">
+    <link rel="stylesheet" href="css/plugins/font-awesome-4.7.0/css/font-awesome.min.css"  media="all">
+  <style>
+        #canvas {
+            float: right;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .login-wrap {
+            background: url('img/login.jpg') no-repeat;
+            width: 100vw;
+            height: 100vh;
+            background-size: 100% 120%;
+            background-position: left top -72px; //可以调整图片的位置
+        position: relative;
+
+        }
+
+    </style>
+</head>
+
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<body class="layui-layout-login">
+<div class="login-bg">
+    <div class="login-wrap"></div>
+</div>
+<div class="login-content"  style="position: absolute;left: 30%;">
+    <h1 class="login-box-title"><i class="fa fa-fw fa-user"></i>登录</h1>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-icon layui-icon-username" for="username"></label>
+            <input class="layui-input" type="text" name="username" id="username" placeholder="用户名" lay-verify="required" autocomplete="off">
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-icon layui-icon-password" for="password"></label>
+            <input class="layui-input" type="password" name="password" id="password" placeholder="密码" lay-verify="required" autocomplete="off">
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-icon layui-icon-vercode" for="canvas"></label>
+            <input type="text" name="vercode" id="vercode" placeholder="请输入验证码" class="layui-input" style="width: 60%" autocomplete="off">
+            <div style="position: absolute;top: 5%;left: 65%;height: 90%">
+            <canvas id="canvas" style="width: 100%;height: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <input type="checkbox" id="rememberMe" name="rememberMe" title="记住密码" lay-skin="primary">
+        </div>
+    </form>
+    <div align="center" class="layui-form-item">
+        <button class="layui-btn" id="loginBtn" lay-submit="" lay-filter="component-form-demo"> 登录 </button>
+    </div>
+</div>
+</body>
+
+<script>
+
+    $(function(){
+
+        var show_num = [];
+        draw(show_num);
+        //默认记住密码
+        if (document.cookie.split(",")[0] == "on") {
+            $("#rememberMe").attr("checked", true);
+            $("#username").val(document.cookie.split(",")[1]);
+            $("#password").val(document.cookie.split(",")[2]);
+        }
+        $("#canvas").on('click',function(){
+            draw(show_num);
+        });
+        $("#loginBtn").on('click',function() {
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var rememberMe = $("#rememberMe").val();
+
+            if (username == "") {
+                layer.msg('用户名不能为空！', {icon: 5, shade: 0.5, time: 1500})
+            } else if (password == "") {
+                layer.msg('密码不能为空！', {icon: 5, shade: 0.5, time: 1500})
+            } else {
+                var val = $("#vercode").val().toLowerCase();
+                var num = show_num.join("");
+
+                if (val == '') {
+                    layer.msg('请输入验证码！', {icon: 5, shade: 0.5, time: 1500});
+                    $("#vercode").val('');
+                    draw(show_num);
+                } else if (val == num) {
+                    if ($("#rememberMe").prop("checked") == true) {
+
+                        var date = new Date();
+                        exdays=1;
+                        date.setTime(date.getTime() + (exdays * 24 * 60 * 60 * 1000*30));
+                        var expires = date.toUTCString();
+                        document.cookie = rememberMe+","+username+","+password+","+expires;
+                    }else{
+                    var date = new Date();
+                    exdays=1;
+                    date.setTime(date.getTime() - (exdays * 24 * 60 * 60 * 1000*30));
+                    var expires = date.toUTCString();
+                        document.cookie = ""+","+username+","+password+","+expires;
+                }
+                    $.post('/user/login',$('form').serialize(),function (r) {
+                        if(r){
+                            window.location.href="/#home.html";
+                            sessionStorage.setItem("username",username);
+                            sessionStorage.setItem("password",password);
+                        }else {
+                            layer.msg('登录失败！',{icon: 5, shade: 0.5, time: 1500},function () {
+                                window.location.href="login.html"
+                            });
+
+                        }
+                    },'json');
+
+                } else {
+                    layer.msg('验证码错误！请重新输入！', {icon: 5, shade: 0.5, time: 1500});
+                      $("#vercode").val('');
+                    draw(show_num);
+                }
+            }
+
+        });
+    });
+
+    function draw(show_num) {
+        var canvas_width=$('#canvas').width();
+        var canvas_height=$('#canvas').height();
+        var canvas = document.getElementById("canvas");//获取到canvas的对象，演员
+        var context = canvas.getContext("2d");//获取到canvas画图的环境，演员表演的舞台
+        canvas.width = canvas_width;
+        canvas.height = canvas_height;
+        var sCode = "A,B,C,E,F,G,H,J,K,L,M,N,P,Q,R,S,T,W,X,Y,Z,1,2,3,4,5,6,7,8,9,0";
+        var aCode = sCode.split(",");
+        var aLength = aCode.length;//获取到数组的长度
+
+        for (var i = 0; i <= 3; i++) {
+            var j = Math.floor(Math.random() * aLength);//获取到随机的索引值
+            var deg = Math.random() * 30 * Math.PI / 180;//产生0~30之间的随机弧度
+            var txt = aCode[j];//得到随机的一个内容
+            show_num[i] = txt.toLowerCase();
+            var x = 10 + i * 20;//文字在canvas上的x坐标
+            var y = 20 + Math.random() * 8;//文字在canvas上的y坐标
+            context.font = "bold 23px 微软雅黑";
+
+            context.translate(x, y);
+            context.rotate(deg);
+
+            context.fillStyle = randomColor();
+            context.fillText(txt, 0, 0);
+
+            context.rotate(-deg);
+            context.translate(-x, -y);
+        }
+        for (var i = 0; i <= 5; i++) { //验证码上显示线条
+            context.strokeStyle = randomColor();
+            context.beginPath();
+            context.moveTo(Math.random() * canvas_width, Math.random() * canvas_height);
+            context.lineTo(Math.random() * canvas_width, Math.random() * canvas_height);
+            context.stroke();
+        }
+        for (var i = 0; i <= 30; i++) { //验证码上显示小点
+            context.strokeStyle = randomColor();
+            context.beginPath();
+            var x = Math.random() * canvas_width;
+            var y = Math.random() * canvas_height;
+            context.moveTo(x, y);
+            context.lineTo(x + 1, y + 1);
+            context.stroke();
+        }
+    }
+
+    function randomColor() {//得到随机的颜色值
+        var r = Math.floor(Math.random() * 256);
+        var g = Math.floor(Math.random() * 256);
+        var b = Math.floor(Math.random() * 256);
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
+</script>
+<script type="text/javascript" src="./layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="./js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="./js/main.js" charset="utf-8"></script>
+<script type="text/javascript" src="./js/plugins/jquery-3.3.1.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+
+
+</html>
